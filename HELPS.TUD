@@ -1,0 +1,22 @@
+				Project Lisp.				
+					de Jozsa Bodnar Istvan (E.A. 4213)
+										
+			In meniul de inceput gasiti 4 optiuni:					
+1. Autor									
+2. Help										
+3. Rulare									
+4. Exit									
+	Ca sa intrati intrati intr-o optiune trebuie sa tastati numarul 
+ corespunzator optiunii si apoi sa apasati pe tasta <ENTER>.			
+	In prima optiune veti gasi numele autorului, numarul grupei in care se
+ afla, si anul de facultate in care se afla.						
+	In a doua optiune veti gasi help, adica acest text.			
+	In a treia optiune veti putea rula programul.				
+	Iar prin ultima optiune veti putea iesi din program in OS.		
+	Pentru a rula programul intrati in optiunea trei unde va trebui sa 
+ introduceti o expresie in forma infixata. Daca expresia nu este bine formulata
+ programul va v-a afisa acest lucru, iar va v-a trimite inapoi in meniu.
+	Pentru intrebari sau sugesti ma puteti contacta prin email:
+ Jozsab1@vega.unitbv.ro
+										
+						Autorul.

@@ -1,0 +1,222 @@
+;*************************** afiseaza meniul
+(defun meniu()
+ (princ "\n\n\n\n\n\n\n\n\n1. Autor.\n2. Help.\n3. Rulare.\n4. Exit.\n\n\n\n\n\n\n\n\n\n\n\nComanda: ")
+ (setq bla "")
+)
+;*************************** afiseaza autorul
+(defun autor()
+ (princ "Autor: Jozsa Bodnar Istvan,\nGrupa: 4213\nAnul: I\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nApasati pe tasta <ENTER> ca sa reveniti in meniu.\n")
+ (read-char)
+ (read-char)
+
+)
+;********************** se uita daca a fost functia intrdusa bine 
+(defun infix(l)
+ (cond  ( (atom l) t)
+	( (member (car l) '(and xor or -> <->)) nil)
+	( (member (caddr l) '(and xor or -> <-> not)) nil)
+	( (and (equal (car l) 'NOT) (member (cadr l) '(not and xor or -> <->))) nil )
+	( (equal (car l) 'NOT) (infix (cadr l)) )
+	( (member (cadr l) '(and xor or -> <->)) (and (infix (car l)) (infix (caddr l)) ) )
+ )
+)
+;********************** reconstruieste expresia pentru lisp
+(defun prefixa(l)
+ (cond	( (atom l) l)
+	( (equal (car l) 'NOT) (append '(NOT) (list(prefixa(cadr l)))) )
+	( (member (cadr l) '(and xor or -> <->)) (append (list(cadr l)) (list(prefixa(car l))) (list(prefixa(caddr l)))) )
+	( t l)
+ )
+)
+;********************* se uita daca expresia este dintr-un element daca nu il reconstrueste
+(defun prefix(l)
+ (cond	( (atom l) 'Nu_este_lista)
+	( t (prefixa l) )
+ )
+)
+;********************* se uita daca expresia e contruit corect
+(defun ebine(l)
+ (cond	( (atom l) t)
+	( (equal (car l) 'NOT) (and (= (length l) 2) (ebine (cadr l))) )
+	( (member (cadr l) '(and or xor -> <->)) (and (= (length l) 3) (and (ebine (car l)) (ebine (caddr l)))) )
+ )
+)
+;******************** incepe sa prelucreze expresia
+(defun rul()
+ (princ "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+ (princ "Intoduceti expresia: ")
+ (setf expresia (read))
+ (cond 	( (atom expresia) (print "Expresia nu este introdusa bine!!!"))
+	( (or (equal (infix expresia) nil) (equal (ebine expresia) nil)) (print "Expresia nu este introdusa bine!!!") )
+	( t (princ "Expresia in prefix este: ")
+                           (print (prefix expresia))
+	    (princ "Lista de variabile fara repetitii este: ")
+                           (print (scotrep (nofun (flat (prefix expresia)))))
+	    ;sa memoram expresia originala
+	    (setf expresia_v expresia)
+	    ;sa convertim expresia pentru lisp
+	    (setf expresia (prefix expresia))
+	    ;lista de variabile
+	    (setf variabilele (scotrep (nofun (flat (prefix expresia)))))
+	    ;initializam pe aux
+	    (setf aux ())
+	    ;cate variabile sunt atatea zerouri adaugam
+	    (dotimes (i (length variabilele))
+	     (setf aux (cons 0 aux))
+	    )
+	     ;pentru stocarea valorilor functiei
+	     (setf valfunc ())
+	     ;sa generam taote combinatiile de variabile
+	    (dotimes (i (hatv 2 (length variabilele)))
+	     ;generaza combinatia urmatoare
+	     (setf aux (x aux t))
+	     ;backup pentru lista de variabile
+	     (setf var2 variabilele)
+	     ;backup pentru bufferul de combinatii pentru variabile
+	     (setf aux2 aux)
+	     ;backup pentru expresia modificata pentru lisp
+	     (setf laux expresia)
+	     ;backup pentru expresia veche
+	     (setf llaux expresia_v)
+	     ;inlocuieste in expresie combinatia urmatoare de variabile
+	     (do ( (ii (car var2) (car (setf var2 (cdr var2))))
+		   (j (car aux2) (car (setf aux2 (cdr aux2))))
+		 )
+		 ((null var2) laux)
+	      (cond ( (equal j 1) (setf laux (inlocuieste t ii laux)) (setf llaux (inlocuieste t ii llaux)) )
+		    ( t (setf laux (inlocuieste nil ii laux)) (setf llaux (inlocuieste nil ii llaux)) )
+	      )
+	     );end do
+	     (princ "Combinatiile:")
+	     (princ llaux)
+	     (princ ":  ")
+	     (print (eval laux))
+	     (setf valfunc (cons (eval laux) valfunc))
+	    );end dotimes
+	    (princ "Valorile functiei: ")
+	    (print valfunc)
+            (setq svalfunc (scotrep valfunc))
+            ; sa testam tipul functiei
+	    (cond ( (> (length svalfunc) 1) (princ "Functia este o functie satisfiabila.\n") )
+		  ( (equal t (car svalfunc)) (princ "Functia este o tautologie.\n") )
+		  (t (princ "Functia este o inconsistenta.\n") )
+	    )
+	);end t
+ );end cond
+ (princ "\n\nApasati pe tasta <ENTER> ca sa reveniti in meniu.\n")
+ (read-char)
+ (read-char)
+)
+;******************** genereaza combinatia urmatoare
+(defun x(l p)
+ (cond 	( (null l) nil)
+	( (and (equal (car l) 1) p) (append '(0) (x (cdr l) p)) )
+	( (equal (car l) 1) (append (list(car l)) (x (cdr l) p)) )
+	( (and (equal (car l) 0) p) (append '(1) (x  (cdr l) (not p))) )
+	( t (append (list (car l)) (x (cdr l) p)) )
+ )
+)
+;************************* functia de putere
+(defun hatv(a n)
+ (cond  ( (= n 0) 1)
+	( t (* a (hatv a (1- n))) )
+ )
+)
+;************************* afiseaza meniul din care alegem
+(defun optiune()
+  (do ( (cur nil (setf cur (read))) )
+      ( (or (equal cur 'e) (equal cur 4)) (exit) )
+   (cond ( (equal cur 1) (autor) (meniu))
+	 ( (equal cur 2) (help) (meniu))
+	 ( (equal cur 3) (rul) (meniu))
+	 ( t (meniu))
+   )
+  )
+)
+;*********************** functia and
+(defun and(a b)
+ (cond	(a b)
+ )
+)
+;*********************** functia or
+(defun or(a b)
+ (cond	(a a)
+	(t b)
+ )
+)
+;*********************** functia or
+(defun xor(a b)
+ (cond	(a (not b))
+	(t b)
+ )
+)
+;********************** functia negatie
+(defun not(a)
+ (cond	(a nil)
+	(t t)
+ )
+)
+;********************** functia implicatie
+(defun ->(a b)
+ (cond	(a b)
+	(t (not a))
+ )
+)
+;********************** functia nici
+(defun <->(a b)
+ (cond	(a b)
+	(t (not b))
+ )
+)
+;*********************** scoate parantezele din expresie
+(defun flat(l)
+ (cond	( (null l) nil)
+	( (atom l) (list l) )
+	( t (append (flat (car l)) (flat (cdr l))) )
+ )
+)
+;*********************** scoate operatorii din expresie
+(defun nofun(l)
+ (cond	( (null l) nil)
+	( (member (car l) '(and not xor or -> <->)) (nofun (cdr l)) )
+	( t (cons (car l) (nofun (cdr l))) )
+ )
+)
+;*********************** scoate repetitiile ditr-o lista
+(defun scotrep(l)
+ (setf x ())
+ (dolist (i l)
+  (cond ( (not (member i x)) (setf x (append x (list i))) )
+	( t )
+  )
+ )
+ x
+)
+;*********************** se uita daca ce cautam este in lista
+(defun member(e l)
+ (cond	( (atom l ) nil)
+	( (equal e (car l)) t)
+	( t (member e (cdr l)) )
+ )
+)
+;*********************** inlocuieste dintr-o lista elementele vechi cu nou
+(defun inlocuieste(nou vechi l)
+ (cond 	( (atom l) l)
+	( (equal vechi (car l)) (cons nou (inlocuieste nou vechi (cdr l))))
+	( t (cons (inlocuieste nou vechi (car l)) (inlocuieste nou vechi (cdr l))) )
+ )
+)
+;*****************pentru a afisa fisierul de help
+(defun help()
+ (let ( (in (openi "HELPS.TUD")) r)
+ (do () ((null (setf r (read-line in))))
+	(princ r))
+ )
+ (princ "\n\n\nApasati pe tasta <ENTER> ca sa reveniti in meniu.\n")
+ (read-char)
+ (read-char)
+)
+;************************* Sa incepe programul
+(defun start()
+ (optiune)
+)
